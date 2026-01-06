@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Books - Online Bookstore</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-brand">The Online Bookstore</div>
+        <div class="nav-links">
+            <a href="books.html">Our Books</a>
+            <a href="cart.html">Shopping Cart</a>
+            <span id="userName"></span>
+            <button id="logoutBtn" onclick="logout()">Log out</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Our Books</h1>
+        
+        <div class="search-section">
+            <div>
+                <label>Select Subject</label>
+                <select id="subjectSelect">
+                    <option value="">-- Select Subject --</option>
+                </select>
+                <button onclick="searchBySubject()">Filter by Subject</button>
+            </div>
+
+            <div>
+                <label>Search by Author</label>
+                <input type="text" id="authorInput" placeholder="Enter author name">
+                <button onclick="searchByAuthor()">Search by Author</button>
+            </div>
+
+            <div>
+                <label>Search by Title</label>
+                <input type="text" id="titleInput" placeholder="Enter book title">
+                <button onclick="searchByTitle()">Search by Title</button>
+            </div>
+
+            <div>
+                <label>Items per page</label>
+                <div id="limitButtons" style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px;">
+                    <button class="limit-btn active" onclick="setLimit(2)">2</button>
+                    <button class="limit-btn" onclick="setLimit(3)">3</button>
+                    <button class="limit-btn" onclick="setLimit(5)">5</button>
+                    <button class="limit-btn" onclick="setLimit(10)">10</button>
+                    <button class="limit-btn" onclick="setLimit(20)">20</button>
+                </div>
+            </div>
+        </div>
+
+        <h2>Books</h2>
+        <div id="message"></div>
+        <div id="booksList"></div>
+        <div id="pagination"></div>
+    </div>
+
+    <script>
+        let currentPage = 1
+        let itemsPerPage = 2
+        let searchType = ''
+        let searchValue = ''
+
+        async function checkAuth() {
+            const response = await fetch('/api/user')
+            const data = await response.json()
+            if (!data.loggedIn) {
+                window.location.href = 'index.html'
+            } else {
+                document.getElementById('userName').textContent = 'Hello, ' + data.name
+            }
+        }
+
+        async function loadSubjects() {
+            const response = await fetch('/api/subjects')
+            const subjects = await response.json()
+            const select = document.getElementById('subjectSelect')
+            subjects.forEach(s => {
+                const option = document.createElement('option')
+                option.value = s.subject
+                option.textContent = s.subject
+                select.appendChild(option)
+            })
+        }
+
+        function setLimit(limit) {
+            itemsPerPage = limit
+            document.querySelectorAll('.limit-btn').forEach(btn => btn.classList.remove('active'))
+            event.target.classList.add('active')
+            currentPage = 1
+            loadBooks()
+        }
+
+        function searchBySubject() {
+            const subject = document.getElementById('subjectSelect').value
+            if (!subject) {
+                document.getElementById('message').innerHTML = 
+                    '<div class="message error">Please select a subject</div>'
+                return
+            }
+            searchType = 'subject'
+            searchValue = subject
+            currentPage = 1
+            loadBooks()
+        }
+
+        function searchByAuthor() {
+            const author = document.getElementById('authorInput').value.trim()
+            if (!author) {
+                document.getElementById('message').innerHTML = 
+                    '<div class="message error">Please enter an author name</div>'
+                return
+            }
+            searchType = 'author'
+            searchValue = author
+            currentPage = 1
+            loadBooks()
+        }
+
+        function searchByTitle() {
+            const title = document.getElementById('titleInput').value.trim()
+            if (!title) {
+                document.getElementById('message').innerHTML = 
+                    '<div class="message error">Please enter a book title</div>'
+                return
+            }
+            searchType = 'title'
+            searchValue = title
+            currentPage = 1
+            loadBooks()
+        }
+
+        async function loadBooks() {
+            if (!searchType || !searchValue) {
+                document.getElementById('booksList').innerHTML = 
+                    '<p>Please select a search option above to view books.</p>'
+                return
+            }
+
+            const url = `/api/books/${searchType}/${encodeURIComponent(searchValue)}?page=${currentPage}&limit=${itemsPerPage}`
+            const response = await fetch(url)
+            const data = await response.json()
+
+            document.getElementById('message').innerHTML = ''
+
+            if (data.books.length === 0) {
+                document.getElementById('booksList').innerHTML = 
+                    '<p>No books found for this search.</p>'
+                document.getElementById('pagination').innerHTML = ''
+                return
+            }
+
+            let html = ''
+            data.books.forEach(book => {
+                html += `
+                    <div class="book-item">
+                        <h3>${book.title}</h3>
+                        <p><strong>Author:</strong> ${book.author}</p>
+                        <p><strong>ISBN:</strong> ${book.isbn}</p>
+                        <p><strong>Price:</strong> ${Math.round(book.price)}kr</p>
+                        <p><strong>Subject:</strong> ${book.subject}</p>
+                        <div>
+                            <input type="number" id="qty-${book.isbn}" value="1" min="1" style="width: 60px;">
+                            <button onclick="addToCart('${book.isbn}')">Add to Cart</button>
+                        </div>
+                    </div>
+                `
+            })
+            document.getElementById('booksList').innerHTML = html
+
+            let paginationHtml = ''
+            if (currentPage > 1) {
+                paginationHtml += `<button onclick="goToPage(${currentPage - 1})">Previous</button>`
+            }
+            
+            // Show limited page numbers
+            const maxPagesToShow = 10
+            let startPage = Math.max(1, currentPage - 5)
+            let endPage = Math.min(data.totalPages, startPage + maxPagesToShow - 1)
+            
+            if (endPage - startPage < maxPagesToShow - 1) {
+                startPage = Math.max(1, endPage - maxPagesToShow + 1)
+            }
+            
+            if (startPage > 1) {
+                paginationHtml += `<button onclick="goToPage(1)">1</button>`
+                if (startPage > 2) {
+                    paginationHtml += `<button disabled>...</button>`
+                }
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const activeClass = i === currentPage ? 'active' : ''
+                paginationHtml += `<button class="${activeClass}" onclick="goToPage(${i})">${i}</button>`
+            }
+            
+            if (endPage < data.totalPages) {
+                if (endPage < data.totalPages - 1) {
+                    paginationHtml += `<button disabled>...</button>`
+                }
+                paginationHtml += `<button onclick="goToPage(${data.totalPages})">${data.totalPages}</button>`
+            }
+            
+            if (currentPage < data.totalPages) {
+                paginationHtml += `<button onclick="goToPage(${currentPage + 1})">Next</button>`
+            }
+            
+            document.getElementById('pagination').innerHTML = paginationHtml
+        }
+
+        function goToPage(page) {
+            currentPage = page
+            loadBooks()
+        }
+
+        async function addToCart(isbn) {
+            const qty = document.getElementById(`qty-${isbn}`).value
+            
+            const response = await fetch('/api/cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isbn, qty: parseInt(qty) })
+            })
+            
+            if (response.ok) {
+                document.getElementById('message').innerHTML = 
+                    '<div class="message success">Added to cart!</div>'
+                setTimeout(() => {
+                    document.getElementById('message').innerHTML = ''
+                }, 2000)
+            } else {
+                const result = await response.json()
+                document.getElementById('message').innerHTML = 
+                    `<div class="message error">${result.error}</div>`
+            }
+        }
+
+        async function logout() {
+            await fetch('/api/logout', { method: 'POST' })
+            window.location.href = 'index.html'
+        }
+
+        checkAuth()
+        loadSubjects()
+    </script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - Online Bookstore</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-brand">The Online Bookstore</div>
+        <div class="nav-links">
+            <a href="books.html">Our Books</a>
+            <a href="cart.html">Shopping Cart</a>
+            <span id="userName"></span>
+            <button id="logoutBtn" onclick="logout()">Log out</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Shopping Cart</h1>
+        <div id="message"></div>
+        <div id="cartContent"></div>
+        <div id="orderContent" style="display: none;"></div>
+    </div>
+
+    <script>
+        async function checkAuth() {
+            const response = await fetch('/api/user')
+            const data = await response.json()
+            if (!data.loggedIn) {
+                window.location.href = 'index.html'
+            } else {
+                document.getElementById('userName').textContent = 'Hello, ' + data.name
+            }
+        }
+
+        async function loadCart() {
+            const response = await fetch('/api/cart')
+            const cartItems = await response.json()
+
+            if (cartItems.length === 0) {
+                document.getElementById('cartContent').innerHTML = 
+                    '<p>Your cart is empty.</p>'
+                return
+            }
+
+            let total = 0
+            let html = '<table><thead><tr><th>ISBN</th><th>Title</th><th>Price</th><th>Quantity</th><th>Total</th></tr></thead><tbody>'
+            
+            cartItems.forEach(item => {
+                html += `
+                    <tr>
+                        <td>${item.isbn}</td>
+                        <td>${item.title}</td>
+                        <td>${Math.round(item.price)}kr</td>
+                        <td>${item.qty}</td>
+                        <td>${Math.round(item.total)}kr</td>
+                    </tr>
+                `
+                total += item.total
+            })
+            
+            html += '</tbody></table>'
+            html += `<h2>Total: ${Math.round(total)}kr</h2>`
+            html += '<button onclick="checkout()" style="background: #28a745;">Checkout</button>'
+            
+            document.getElementById('cartContent').innerHTML = html
+        }
+
+        async function checkout() {
+            const response = await fetch('/api/checkout', { method: 'POST' })
+            const result = await response.json()
+
+            if (response.ok) {
+                loadOrder(result.orderId)
+            } else {
+                document.getElementById('message').innerHTML = 
+                    `<div class="message error">${result.error}</div>`
+            }
+        }
+
+        async function loadOrder(orderId) {
+            const response = await fetch(`/api/order/${orderId}`)
+            const data = await response.json()
+
+            const order = data.order
+            const details = data.details
+
+            const orderDate = new Date(order.created)
+            const deliveryDate = new Date(orderDate)
+            deliveryDate.setDate(deliveryDate.getDate() + 7)
+
+            let html = '<h2>Order Details</h2>'
+            html += `<div class="order-box"><h3>Invoice for Order no.${order.ono}</h3>`
+            html += '<h4>Shipping Address</h4>'
+            html += `<p><strong>Name:</strong> ${order.fname} ${order.lname}</p>`
+            html += `<p><strong>Address:</strong> ${order.shipAddress}</p>`
+            html += `<p><strong>City/Zip:</strong> ${order.shipCity}, ${order.shipZip}</p>`
+            html += '<h4>Books</h4>'
+            html += '<table><thead><tr><th>ISBN</th><th>Title</th><th>Price</th><th>Quantity</th><th>Total</th></tr></thead><tbody>'
+            
+            let orderTotal = 0
+            details.forEach(item => {
+                html += `
+                    <tr>
+                        <td>${item.isbn}</td>
+                        <td>${item.title}</td>
+                        <td>${Math.round(item.amount / item.qty)}kr</td>
+                        <td>${item.qty}</td>
+                        <td>${Math.round(item.amount)}kr</td>
+                    </tr>
+                `
+                orderTotal += item.amount
+            })
+            
+            html += '</tbody></table>'
+            html += `<h3>Order Total: ${Math.round(orderTotal)}kr</h3>`
+            html += `<p><strong>Order Date:</strong> ${orderDate.toLocaleDateString()}</p>`
+            html += `<p><strong>Delivery Date:</strong> ${deliveryDate.toLocaleDateString()}</p>`
+            html += '</div>'
+
+            document.getElementById('cartContent').style.display = 'none'
+            document.getElementById('orderContent').style.display = 'block'
+            document.getElementById('orderContent').innerHTML = html
+        }
+
+        async function logout() {
+            await fetch('/api/logout', { method: 'POST' })
+            window.location.href = 'index.html'
+        }
+
+        checkAuth()
+        loadCart()
+    </script>
+</body>
+</html>

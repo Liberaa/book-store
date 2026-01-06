@@ -1,0 +1,271 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background: #f4f4f4;
+}
+
+nav {
+    background: #333;
+    color: white;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.nav-links a, .nav-links span {
+    color: white;
+    text-decoration: none;
+    margin-left: 20px;
+}
+
+.nav-links button {
+    margin-left: 20px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+}
+
+h1, h2 {
+    margin-bottom: 20px;
+}
+
+form {
+    max-width: 500px;
+}
+
+label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+}
+
+button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+.message {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.search-section {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.search-section > div {
+    margin-bottom: 20px;
+}
+
+.search-section label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.search-section input,
+.search-section select {
+    margin-top: 0;
+}
+
+.search-section button {
+    margin-top: 10px;
+}
+
+.book-item {
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    background: #fff;
+    transition: box-shadow 0.3s;
+}
+
+.book-item:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.book-item h3 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+.book-item p {
+    margin: 8px 0;
+    color: #555;
+}
+
+.book-item > div {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #333;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tbody tr:hover {
+    background: #f8f9fa;
+}
+
+#pagination {
+    display: flex;
+    gap: 5px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+#pagination button {
+    margin: 0;
+    padding: 10px 15px;
+    min-width: 45px;
+    background: #fff;
+    border: 1px solid #ddd;
+    color: #333;
+    font-weight: 500;
+}
+
+#pagination button:hover {
+    background: #f8f9fa;
+    border-color: #007bff;
+}
+
+#pagination button.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+#pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.limit-btn {
+    margin: 5px;
+    padding: 10px 15px;
+    background: #fff;
+    border: 1px solid #ddd;
+    color: #333;
+    font-weight: 500;
+}
+
+.limit-btn:hover {
+    background: #f8f9fa;
+    border-color: #007bff;
+}
+
+.limit-btn.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.order-box {
+    border: 2px solid #ddd;
+    padding: 20px;
+    border-radius: 8px;
+    background: #f8f9fa;
+}

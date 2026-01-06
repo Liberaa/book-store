@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log in - Bookstore</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-brand">The Online Bookstore</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="login.html">Log In</a>
+            <a href="register.html">Register</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Log in</h1>
+        
+        <div id="message" class="message" style="display:none;"></div>
+
+        <form id="loginForm">
+            <label>Email:</label>
+            <input type="email" name="email" required>
+
+            <label>Password:</label>
+            <input type="password" name="password" required>
+
+            <button type="submit">Log in</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault()
+            
+            const formData = new FormData(e.target)
+            const data = Object.fromEntries(formData)
+            
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                
+                const result = await res.json()
+                
+                if (res.ok) {
+                    window.location.href = 'books.html'
+                } else {
+                    const messageDiv = document.getElementById('message')
+                    messageDiv.className = 'message error'
+                    messageDiv.textContent = result.error
+                    messageDiv.style.display = 'block'
+                }
+            } catch (error) {
+                console.error(error)
+                alert('Login failed')
+            }
+        })
+    </script>
+</body>
+</html>

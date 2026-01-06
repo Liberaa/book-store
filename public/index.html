@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Bookstore</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-brand">The Online Bookstore</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="books.html" id="booksLink" style="display:none;">Our Books</a>
+            <a href="cart.html" id="cartLink" style="display:none;">Cart</a>
+            <a href="login.html" id="loginLink">Log In</a>
+            <a href="register.html" id="registerLink">Register</a>
+            <span id="userGreeting" style="display:none;"></span>
+            <button id="logoutBtn" style="display:none;">Log out</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Welcome to the Online Bookstore</h1>
+        <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=600" alt="Bookstore" style="max-width: 500px; margin: 20px auto; display: block;">
+    </div>
+
+    <script>
+        // Check if user is logged in
+        fetch('/api/user')
+            .then(res => res.json())
+            .then(data => {
+                if (data.loggedIn) {
+                    document.getElementById('loginLink').style.display = 'none'
+                    document.getElementById('registerLink').style.display = 'none'
+                    document.getElementById('booksLink').style.display = 'inline'
+                    document.getElementById('cartLink').style.display = 'inline'
+                    document.getElementById('userGreeting').style.display = 'inline'
+                    document.getElementById('userGreeting').textContent = `Hello, ${data.name}!`
+                    document.getElementById('logoutBtn').style.display = 'inline'
+                }
+            })
+
+        document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+            await fetch('/api/logout', { method: 'POST' })
+            location.reload()
+        })
+    </script>
+</body>
+</html>
